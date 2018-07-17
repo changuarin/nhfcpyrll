@@ -39,13 +39,13 @@
 				          	<div class="col-md-2">
 						          <div class="form-group">
 						              <label for="form_name">START</label>
-						              <input id="form_name" type="text" name="start_date" class="form-control" value="<?php echo $start_date; ?>">
+						              <input id="form_name" type="text" name="start_date" class="form-control" value=" <?php echo $cut_off->start_date; ?>">
 						          </div>
 						        </div>
 						        <div class="col-md-2">
 						          <div class="form-group">
 						              <label for="form_name">END</label>
-						              <input id="form_name" type="text" name="end_date" class="form-control" value="<?php echo $end_date; ?>">
+						              <input id="form_name" type="text" name="end_date" class="form-control" value="<?php echo $cut_off->end_date; ?>">
 						          </div>
 						        </div>	
 						        <br>

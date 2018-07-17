@@ -105,12 +105,6 @@
                      <li>
                         <a href="<?php echo base_url(); ?>index.php/reports/index_ot"><i class="fa fa-archive fa-fw"></i>OverTime</a>
                     </li>
-                    <li>
-                        <a href="<?php echo base_url(); ?>reports/index_technical"><i class="fa fa-gear fa-fw"></i>Technical</a>
-                    </li>
-                    <li>
-                        <a href="<?php echo base_url(); ?>reports/index_transmittal"><i class="fa fa-file fa-fw"></i>Transmittal</a>
-                    </li>
                 </ul>
             </li>
             <li class="dropdown">

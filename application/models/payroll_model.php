@@ -98,12 +98,22 @@ class Payroll_model extends CI_Model {
 
 		$data = array(
 		'start_date' => $start_date,
-			'end_date'   => $end_date 
+		'end_date'   => $end_date 
 		);
  
 		$query = $this->db->insert('tbl_cut_off_date', $data);
 		
 		return $query;
+	}
+
+	public function get_cut_off_date()
+	{
+		$this->db->select('start_date,end_date');
+		$this->db->from('tbl_cut_off_date');
+		$this->db->order_by('id','DESC');
+		$query = $this->db->get();
+
+		return $query->row();
 	}
 
 	public function employee_data($employee_no, $start_date, $end_date)
@@ -143,10 +153,12 @@ class Payroll_model extends CI_Model {
 		return $query->result();
 	}
 
-	public function get_ots()
+	public function get_ots($start_date, $end_date)
 	{
 		$this->db->select('tbl_ot.id as id, tbl_ot.employee_number as employee_number, tbl_ot.name as name,tbl_ot.time_in as time_in, tbl_ot.time_out as time_out, tbl_ot.date_ot as date_ot, tbl_ot.nature_of_work as nature_of_work');
 		$this->db->from('tbl_ot');
+		$this->db->where('tbl_ot.date_ot >=', $start_date);
+		$this->db->where('tbl_ot.date_ot <=', $end_date);
 		$query = $this->db->get();
 
 		return $query->result();
@@ -164,6 +176,8 @@ class Payroll_model extends CI_Model {
 
 	public function add_ot()
 	{
+		$this->db->trans_start();
+
 		$data = array(
 			'employee_number' => $this->input->post('employee_number'),
 			'name'            => $this->input->post('name'),
@@ -175,7 +189,38 @@ class Payroll_model extends CI_Model {
 
 		$query = $this->db->insert('tbl_ot', $data);
 
-		return $query;
+		$this->db->select('id,time_in,time_out');
+		$this->db->order_by('id','DESC');
+		$this->db->from('tbl_ot');
+		$query = $this->db->get();
+		$id = $query->row()->id;
+		$timein = $query->row()->time_in;
+		$timeout = $query->row()->time_out;
+
+		$in_ot = explode(':', $timein);
+ 		$hr_in_ot = $in_ot[0];
+ 		$min_in_ot = $in_ot[1];
+
+ 		$out_ot = explode(':', $timeout);
+ 		$hr_out_ot = $out_ot[0];
+ 		$min_out_ot = $out_ot[1];
+
+ 		$total_ot_in_min = intval($hr_in_ot*60) + $min_in_ot; 
+		$total_ot_out_min = intval($hr_out_ot*60) + $min_out_ot; 
+
+		$total_min_diff = intval($total_ot_out_min - $total_ot_in_min);
+		$hr_diff = intval($total_min_diff/60);
+		$min_diff = intval($total_min_diff%60);
+		$ot_num = $hr_diff.".".$min_diff."";
+
+		$data = array(
+			'ot_num' => $ot_num
+		);
+		$this->db->where('id', $id);
+		$this->db->update('tbl_ot', $data);
+
+		$trans = $this->db->trans_complete();
+		return $trans;
 	}
 
 	public function update_ot($id)
@@ -225,41 +270,58 @@ class Payroll_model extends CI_Model {
 		return $query->row();
 	}	
 
-	/*public function add_in_out()
-	{
-		$date = $this->input->post('date');
-		$time = $this->input->post('time');
-
-		$data = array(
-			'in_id'					  => $this->input->post('in_id'),
-			'employee_number' => $this->input->post('employee_number'),
-			'name'            => $this->input->post('name'),
-			'date'            => $this->input->post('date'),
-			'time'            => $date." ".$time,
-			'status'         	=> $this->input->post('status')
-		);
-		$query = $this->db->insert('tbl_out_attendance', $data);
-
-		return $query;
-	}*/
-
 	public function add_slvl()
 	{
+		$this->db->trans_start();
+
 		$start_date = date('Y-m-d', strtotime($this->input->post('start_date')));
 		$end_date = date('Y-m-d', strtotime($this->input->post('end_date')));
 		$data = array(
 			'employee_number'      => $this->input->post('employee_number'),
 			'name'                 => $this->input->post('name'),
-			'date'								 => $this->input->post('date'),
+			'date'								 =>	$start_date,
 			'effective_date_start' => $start_date,
 			'effective_date_end'   => $end_date,
 			'type'                 => $this->input->post('slvl_type'),
 			'reason'               => $this->input->post('reason')
 		);
 
-		$query = $this->db->insert('tbl_slvl', $data);
+		$this->db->insert('tbl_slvl', $data);
 
-		return $query;
+		$this->db->select('id,effective_date_start, effective_date_end');
+		$this->db->order_by('id', 'DESC');
+		$query=$this->db->get('tbl_slvl');
+		$id = $query->row()->id;
+		$startdate = $query->row()->effective_date_start;
+		$enddate = $query->row()->effective_date_end;
+
+		$start_date = $startdate; 
+   	$end_date = $enddate;
+
+   	$datediff = (strtotime($end_date) - strtotime($start_date));
+		$num_dates = floor($datediff / (60 * 60 * 24));
+		$num_dates = $num_dates + 1;
+
+		$data = array(
+			'slvl_num' => $num_dates
+		);
+		$this->db->where('id', $id);
+		$this->db->update('tbl_slvl', $data);
+
+		$trans = $this->db->trans_complete();
+
+		return $trans;
+	}
+
+	public function get_slvl_all($start_date, $end_date)
+	{
+		$this->db->select("tbl_slvl.employee_number as employee_number, tbl_slvl.name as name, tbl_slvl.type as type, tbl_slvl.date as date, tbl_slvl.effective_date_start as date_start, tbl_slvl.effective_date_end as date_end, tbl_slvl.reason as reason");
+		$this->db->from('tbl_slvl');
+		$this->db->where('tbl_slvl.date >=', $start_date);
+		$this->db->where('tbl_slvl.date <=', $end_date);
+		$query = $this->db->get();
+
+		return $query->result();
 	}
 
 	public function get_slvl($employee_no,$start_date,$end_date)
@@ -307,6 +369,44 @@ class Payroll_model extends CI_Model {
 		$trans = $this->db->trans_complete();
 	
 		return $trans;	
+	}
+
+	public function process_time_keeping()
+	{
+		$this->db->trans_start();
+		$name 			= $this->input->post('name');
+		$dates 			= $this->input->post('dates');
+		$intime 		= $this->input->post('intime');
+		$outtime 		= $this->input->post('outtime');
+		$daily_hrs 	= $this->input->post('daily_hrs');
+		$hours_late = $this->input->post('hours_late');
+		$undertime 	= $this->input->post('undertime');
+		$ot_morning = $this->input->post('ot_morning');
+		$ot_night   = $this->input->post('ot_night');
+		$night_diff = $this->input->post('nd');
+		$i = 0;
+
+		foreach($this->input->post('employee_number') as $emp_no)
+		{
+			$data = array(
+				'employee_number' => $emp_no,
+				'name'            => $name[$i],
+				'dates'            => $dates[$i],
+				'time_in'         => $intime[$i],
+				'time_out'       	=> $outtime[$i],
+				'daily_hours'     => $daily_hrs[$i],
+				'hours_late'      => $hours_late[$i],
+				'undertime'       => $undertime[$i],
+				'ot_morning'      => $ot_morning[$i],
+				'ot_night'        => $ot_night[$i],
+				'night_diff'      => $night_diff[$i]
+			);
+			$this->db->insert('tbl_time_keeping', $data);
+			$i++;
+		}
+		$trans = $this->db->trans_complete();
+
+		return $trans;
 	}
 
 	public function process_ob()
@@ -375,5 +475,4 @@ class Payroll_model extends CI_Model {
 	}
 
 
-	
 }	

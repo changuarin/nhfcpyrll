@@ -38,7 +38,7 @@ class Reports extends CI_Controller {
 			$data['end_date'] = date('Y-m-d');
 			$data['status'] = ' ';
 		}
-
+		$data['cut_off'] = $this->payroll_model->get_cut_off_date();
 		$data['in'] = $this->payroll_model->get_in($data['start_date'], $data['end_date'], $data['status']);
 		$data['outs'] = $this->payroll_model->get_out($data['start_date'], $data['end_date'], $data['status']);
 		//$data['holidays'] = $this->payroll_model->get_holiday(); 
@@ -84,48 +84,22 @@ class Reports extends CI_Controller {
 
 	public function index_slvl()
 	{
-		// Get record count
-	 	$this->load->library('pagination');
+		if($this->input->server('REQUEST_METHOD') == 'POST')
+		{
+			$data['start_date'] = $this->input->post('start_date');
+			$data['end_date'] = $this->input->post('end_date');
+		}
+		else 
+		{
+			$data['start_date'] = date('Y-m-d');
+			$data['end_date'] = date('Y-m-d');
+		}
 
-	 	$total_rows = $this->db->count_all('tbl_slvl');
-	 	$limit = 5;
-
-	 	$start = $this->uri->segment(3);
-
-	 	$this->db->order_by('date','DESC');
-	 	$this->db->limit($limit, $start);
-	 	//$keyword    =   $this->input->post('keyword');
-	 	//$this->db->like('name', $keyword);
-
-	 	$this->db->select("tbl_slvl.employee_number as employee_number, tbl_slvl.name as name, tbl_slvl.type as type, tbl_slvl.date as date, tbl_slvl.effective_date_start as date_start, tbl_slvl.effective_date_end as date_end, tbl_slvl.reason as reason");
-		$this->db->from('tbl_slvl');
-
-	  $query = $this->db->get();
-	  $data['slvl'] = $query->result();
-
-	  $config['base_url']   = 'http://it2-pc/nhfcpayrollsystem/index.php/reports/index_slvl';
-	  $config['total_rows'] = $total_rows;
-	  $config['per_page']   = $limit;
-
-	  $config['full_tag_open']    = "<ul class='pagination'>";
-		$config['full_tag_close']   = "</ul>";
-		$config['num_tag_open']     = "<li>";
-		$config['num_tag_close']    = "</li>";
-		$config['cur_tag_open']     = "<li class='disabled'><li class='active'><a href='#'>";
-		$config['cur_tag_close']    = "<span class='sr-only'></span></a></li>";
-		$config['next_tag_open']    = "<li>";
-		$config['next_tagl_close']  = "</li>";
-		$config['prev_tag_open']    = "<li>";
-	  $config['prev_tagl_close']  = "</li>";
-		$config['first_tag_open']   = "<li>";
-		$config['first_tagl_close'] = "</li>";
-		$config['last_tag_open']    = "<li>";
-		$config['last_tagl_close']  = "</li>";
-
-	  
-	  $this->pagination->initialize($config);	
-	  $data['main_content'] = 'reports/slvl/index';
-		$this->load->view('layouts/main', $data);		
+		$data['cut_off'] = $this->payroll_model->get_cut_off_date();
+		$data['slvl'] = $this->payroll_model->get_slvl_all($data['start_date'],$data['end_date']); 
+		$data['main_content'] = 'reports/slvl/index'; 
+		$this->load->view('layouts/main', $data);	
+	
 	}
 
 	public function add_slvl()
@@ -166,12 +140,13 @@ class Reports extends CI_Controller {
 			$data['end_date'] = date('Y-m-d');                         
 		                  
 		}                 
-                                                                                         
+    
+    $data['cut_off'] = $this->payroll_model->get_cut_off_date();
 		$data['obs'] = $this->payroll_model->get_ob($data['start_date'], $data['end_date']);         
 	  $data['main_content'] = 'reports/ob/index';  
 		$this->load->view('layouts/main', $data);	  
 	}  
-      
+
 	public function process_ob()
 	{
 		$this->payroll_model->process_ob();
@@ -208,8 +183,20 @@ class Reports extends CI_Controller {
 
 	public function index_ot()
 	{
+		if($this->input->server('REQUEST_METHOD') == 'POST')
+		{
+			$data['start_date'] = $this->input->post('start_date');
+			$data['end_date'] = $this->input->post('end_date');
+		}
+		else 
+		{
+			$data['start_date'] = date('Y-m-d');
+			$data['end_date'] = date('Y-m-d');
+		}
+
+		$data['cut_off'] = $this->payroll_model->get_cut_off_date();
+		$data['ots'] = $this->payroll_model->get_ots($data['start_date'], $data['end_date']);
 		$data['main_content'] = 'reports/ot/index';
-		$data['ots'] = $this->payroll_model->get_ots();
 		$this->load->view('layouts/main', $data);
 	}
 

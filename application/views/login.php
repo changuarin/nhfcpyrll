@@ -70,7 +70,7 @@
 
 <footer>
 
-  <p>Copyright © <a href="#">NHFC PAYROLLSYSTEM</a> As 2018-2019. All rights reserved.</p>              
+  <p>Copyright ©基督教瓜林 <a href="#">NHFC PAYROLLSYSTEM</a> As 2018-2019. All rights reserved.</p>              
 </footer>
   <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
 

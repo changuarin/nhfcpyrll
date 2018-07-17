@@ -74,7 +74,7 @@
 	        </div>
          	<div class="row">
 	          <div class="col-md-10">
-	              <center><input type="submit" class="btn btn-primary btn-send" value="Submit"></center>
+	              <center><input type="submit" class="btn btn-primary btn-send" value="Update"></center>
 	          </div>
 		      </div>
 	    	</form>

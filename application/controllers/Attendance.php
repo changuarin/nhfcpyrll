@@ -15,12 +15,18 @@ class Attendance extends CI_Controller {
 			$data['end_date'] = date('Y-m-d');
 		}
 		
-
+		$data['cut_off'] = $this->payroll_model->get_cut_off_date();
 		$data['employee'] = $this->payroll_model->get_allAttendance($data['start_date'], $data['end_date']);
 		$data['schedules'] = $this->payroll_model->employee_sched();
 		$data['main_content'] = 'payroll/attendance/index';
 
 		$this->load->view('layouts/main', $data);
+	}
+
+	public function process_time()
+	{
+		$this->payroll_model->process_time_keeping();
+		redirect('attendance/index_attendance');
 	}
 
 }	

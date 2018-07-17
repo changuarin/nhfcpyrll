@@ -61,7 +61,6 @@
 	            <div class="form-group">
 	                <label for="form_name">EFFECTIVE DATE OF LEAVE</label>
 	                <input id="form_name" type="text" name="start_date" class="form-control" placeholder="START YYYY-MM-DD">
-	                <input id="form_name" type="hidden" name="date" class="form-control" value="<?php echo date('Y-m-d'); ?>">
 	            </div>
 	          </div>
 	          <div class="col-md-5">
